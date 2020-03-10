@@ -94,13 +94,13 @@ class AudioRecorderController: UIViewController {
             
             self.updateViews()
             
-//            if let audioRecorder = self.audioRecorder,
-//                self.isRecording == true {
-//
-//                audioRecorder.updateMeters()
-//                self.audioVisualizer.addValue(decibelValue: audioRecorder.averagePower(forChannel: 0))
-//
-//            }
+            if let audioRecorder = self.audioRecorder,
+                self.isRecording == true {
+
+                audioRecorder.updateMeters()
+                self.audioVisualizer.addValue(decibelValue: audioRecorder.averagePower(forChannel: 0))
+
+            }
             
             if let audioPlayer = self.audioPlayer,
                 self.isPlaying == true {
@@ -219,6 +219,8 @@ class AudioRecorderController: UIViewController {
         audioRecorder?.record()
         self.recordingURL = recordingURL
         
+        audioRecorder?.delegate = self
+        
     }
     
     func stopRecording() {
@@ -269,4 +271,24 @@ extension AudioRecorderController: AVAudioPlayerDelegate {
         cancelTimer()
         updateViews()
     }
+}
+
+extension AudioRecorderController: AVAudioRecorderDelegate {
+    func audioRecorderEncodeErrorDidOccur(_ recorder: AVAudioRecorder, error: Error?) {
+        if let error = error {
+            print("Error saving to disk\(error)")
+        }
+        updateViews()
+    }
+    
+    func audioRecorderDidFinishRecording(_ recorder: AVAudioRecorder, successfully flag: Bool) {
+        guard let recordingURL = recordingURL else {return}
+        
+        audioPlayer = try? AVAudioPlayer(contentsOf: recordingURL) //TODO: Error Handle
+        
+        updateViews()
+        
+        
+    }
+    
 }
