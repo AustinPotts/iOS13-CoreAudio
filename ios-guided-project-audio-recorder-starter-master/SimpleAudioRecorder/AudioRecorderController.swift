@@ -27,6 +27,9 @@ class AudioRecorderController: UIViewController {
         }
     }
     
+    var audioRecorder: AVAudioRecorder?
+    
+    var recordingURL: URL?
     
     var timer: Timer?
     
@@ -54,6 +57,7 @@ class AudioRecorderController: UIViewController {
                                                                    weight: .regular)
         
         loadAudio()
+        updateViews()
     }
     
     deinit {
@@ -86,7 +90,7 @@ class AudioRecorderController: UIViewController {
         timer = Timer.scheduledTimer(withTimeInterval: 0.030, repeats: true) { [weak self] (_) in
             guard let self = self else { return }
             
-            print("updateTimer")
+           
             
             self.updateViews()
             
@@ -158,6 +162,10 @@ class AudioRecorderController: UIViewController {
     
     // MARK: - Recording
     
+    var isRecording: Bool {
+        return audioRecorder?.isRecording ?? false
+    }
+    
     func createNewRecordingURL() -> URL {
         let documents = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!
         
@@ -204,9 +212,17 @@ class AudioRecorderController: UIViewController {
     
     func startRecording() {
         
+        let format = AVAudioFormat(standardFormatWithSampleRate: 44_100, channels: 1)!
+        
+       let recordingURL = createNewRecordingURL()
+        audioRecorder = try? AVAudioRecorder(url: recordingURL, format: format)
+        audioRecorder?.record()
+        self.recordingURL = recordingURL
+        
     }
     
     func stopRecording() {
+        audioRecorder?.stop()
         
     }
     
@@ -226,6 +242,11 @@ class AudioRecorderController: UIViewController {
     }
     
     @IBAction func toggleRecording(_ sender: Any) {
+        if isRecording {
+            stopRecording()
+        } else {
+            startRecording()
+        }
         
     }
 }
