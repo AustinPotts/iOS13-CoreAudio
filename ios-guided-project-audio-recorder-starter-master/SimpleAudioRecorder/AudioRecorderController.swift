@@ -20,7 +20,12 @@ class AudioRecorderController: UIViewController {
     
     
     //MARK: - Audi Player Property
-    var audioPlayer: AVAudioPlayer?
+    var audioPlayer: AVAudioPlayer? {
+        didSet {
+            guard let audioPlayer = audioPlayer else {return}
+            audioPlayer.delegate = self
+        }
+    }
     
     private lazy var timeIntervalFormatter: DateComponentsFormatter = {
         // NOTE: DateComponentFormatter is good for minutes/hours/seconds
@@ -205,3 +210,18 @@ class AudioRecorderController: UIViewController {
     }
 }
 
+extension AudioRecorderController: AVAudioPlayerDelegate {
+    
+    func audioPlayerDidFinishPlaying(_ player: AVAudioPlayer, successfully flag: Bool) {
+        if flag {
+            updateViews()
+        }
+    }
+    
+    //Helps us debug audio files
+    func audioPlayerDecodeErrorDidOccur(_ player: AVAudioPlayer, error: Error?) {
+        if let error = error {
+            print("Error decoding audi: \(error)")
+        }
+    }
+}
