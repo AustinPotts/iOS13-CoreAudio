@@ -7,6 +7,7 @@
 //
 
 import UIKit
+import AVFoundation
 
 class AudioRecorderController: UIViewController {
     
@@ -16,6 +17,10 @@ class AudioRecorderController: UIViewController {
     @IBOutlet var timeRemainingLabel: UILabel!
     @IBOutlet var timeSlider: UISlider!
     @IBOutlet var audioVisualizer: AudioVisualizer!
+    
+    
+    //MARK: - Audi Player Property
+    var audioPlayer: AVAudioPlayer?
     
     private lazy var timeIntervalFormatter: DateComponentsFormatter = {
         // NOTE: DateComponentFormatter is good for minutes/hours/seconds
@@ -41,6 +46,13 @@ class AudioRecorderController: UIViewController {
                                                                    weight: .regular)
         
         loadAudio()
+    }
+    
+    func updateViews() {
+        
+        playButton.isSelected = isPlaying
+        
+        
     }
     
     
@@ -81,9 +93,18 @@ class AudioRecorderController: UIViewController {
     
     // MARK: - Playback
     
+    var isPlaying: Bool {
+        // when the audio player is nil that means theres no resource loaded to play
+        audioPlayer?.isPlaying ?? false
+    }
+    
     func loadAudio() {
+        
+        //TODO: Clean Up for production, good for prototyping, we want to crash to find issues
         let songURL = Bundle.main.url(forResource: "piano", withExtension: "mp3")!
         
+        audioPlayer = try! AVAudioPlayer(contentsOf: songURL) //Crash if resource cannot be loaded
+        //FIXME: Use error Handling if crash
         
     }
     
@@ -95,12 +116,16 @@ class AudioRecorderController: UIViewController {
     }
     */
     
+    
+    
     func play() {
+        
+        audioPlayer?.play()
         
     }
     
     func pause() {
-        
+        audioPlayer?.pause()
     }
     
     
@@ -161,6 +186,11 @@ class AudioRecorderController: UIViewController {
     // MARK: - Actions
     
     @IBAction func togglePlayback(_ sender: Any) {
+        if isPlaying {
+            pause()
+        } else {
+            play()
+        }
         
     }
     
