@@ -58,6 +58,7 @@ class AudioRecorderController: UIViewController {
         
         loadAudio()
         updateViews()
+        try? prepareAudioSession() //TODO: Error Handling
     }
     
     deinit {
@@ -67,6 +68,7 @@ class AudioRecorderController: UIViewController {
     func updateViews() {
         
         playButton.isSelected = isPlaying
+        recordButton.isSelected = isRecording
         
         let elapsedTime = audioPlayer?.currentTime ?? 0
         let duration = audioPlayer?.duration ?? 0
@@ -76,6 +78,8 @@ class AudioRecorderController: UIViewController {
         timeSlider.value = Float(elapsedTime)
         timeSlider.minimumValue = 0
         timeSlider.maximumValue = Float(duration)
+        
+        
         
         
     }
@@ -135,13 +139,13 @@ class AudioRecorderController: UIViewController {
         
     }
     
-    /*
+    // If you don't set active on a device, record won't work or other bad behaviors
     func prepareAudioSession() throws {
         let session = AVAudioSession.sharedInstance()
         try session.setCategory(.playAndRecord, options: [.defaultToSpeaker])
         try session.setActive(true, options: []) // can fail if on a phone call, for instance
     }
-    */
+    
     
     
     
@@ -177,13 +181,13 @@ class AudioRecorderController: UIViewController {
         return file
     }
     
-    /*
+    
     func requestPermissionOrStartRecording() {
         switch AVAudioSession.sharedInstance().recordPermission {
         case .undetermined:
             AVAudioSession.sharedInstance().requestRecordPermission { granted in
                 guard granted == true else {
-                    print("We need microphone access")
+                    print("We need microphone access") // Privacy for micorphone denied
                     return
                 }
                 
@@ -208,7 +212,7 @@ class AudioRecorderController: UIViewController {
             break
         }
     }
-    */
+    
     
     func startRecording() {
         
@@ -221,10 +225,13 @@ class AudioRecorderController: UIViewController {
         
         audioRecorder?.delegate = self
         
+        updateViews()
+        
     }
     
     func stopRecording() {
         audioRecorder?.stop()
+        updateViews()
         
     }
     
@@ -247,7 +254,7 @@ class AudioRecorderController: UIViewController {
         if isRecording {
             stopRecording()
         } else {
-            startRecording()
+            requestPermissionOrStartRecording()
         }
         
     }
